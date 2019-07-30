@@ -1,63 +1,61 @@
 .uml-menu {
-    list-style: none;
-    position: absolute;
-    width: 150px;
-    height: 60px;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    padding: 5px 10px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    background-color: $uml-tools-color;
-    margin: auto;
-    box-shadow: $sm-shadow;
-    border-radius: 4px;
+	list-style: none;
+	position: absolute;
+	width: 150px;
+	height: 60px;
+	left: 0;
+	bottom: 0;
+	right: 0;
+	padding: 5px 10px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	background-color: $uml-tools-color;
+	margin: auto;
+	box-shadow: $sm-shadow;
+	border-radius: 4px;
 
-    li {
-        transition: margin-bottom 0.1s ease-in-out;
+	li {
+		transition: margin-bottom 0.1s ease-in-out;
 
-        &:hover {
-            margin-bottom: 4px;
-        }
+		&:hover {
+			margin-bottom: 4px;
+		}
+	}
 
-    }
+	.uml-class-icon {
+		position: relative;
+		height: 50px;
+		cursor: grab;
+		width: 40px;
+		background-color: white;
+		border: 1px solid $border-color;
+		border-radius: 2px;
+		display: block;
+		box-shadow: $md-shadow;
+		transition: all 0.2s ease-in-out;
 
-    .uml-class-icon {
-        position: relative;
-        height: 50px;
-        cursor: grab;
-        width: 40px;
-        background-color: white;
-        border: 1px solid $border-color;
-        border-radius: 2px;
-        display: block;
-        box-shadow: $md-shadow;
-        transition: all 0.2s ease-in-out;
+		&::before {
+			content: 'Class';
+			background-color: $primary;
+			position: absolute;
+			left: 0;
+			top: 2px;
+			font-size: 10px;
+			padding: 2px 8px 2px 2px;
+			border-radius: 1px;
+		}
 
-        &::before {
-            content: 'Class';
-            background-color: $primary;
-            position: absolute;
-            left: 0;
-            top: 2px;
-            font-size: 10px;
-            padding: 2px 8px 2px 2px;
-            border-radius: 1px;
-        }
-
-        
-        &::after {
-            content: '__  ___  __  ___  __  ___';
-            position: absolute;
-            color: #8c8787;
-            left: 0px;
-            top: 15px;
-            font-size: 10px;
-            padding: 2px 8px 2px 2px;
-            border-radius: 1px;
-            line-height: 4px
-        }
-    }
+		&::after {
+			content: '__  ___  __  ___  __  ___';
+			position: absolute;
+			color: #8c8787;
+			left: 0px;
+			top: 15px;
+			font-size: 10px;
+			padding: 2px 8px 2px 2px;
+			border-radius: 1px;
+			line-height: 4px;
+		}
+	}
 }
