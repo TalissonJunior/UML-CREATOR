@@ -1,10 +1,10 @@
 .uml_input {
-	background-color: $primary;
-	border: none;
-	width: 95%;
+  background-color: $primary;
+  border: none;
+  width: 95%;
 
-	&:focus {
-		outline: none;
-		border: 1px solid $input-border-color;
-	}
+  &:focus {
+    outline: none;
+    border: 1px solid $input-border-color;
+  }
 }

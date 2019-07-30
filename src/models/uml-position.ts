@@ -1,4 +1,4 @@
 export class UMLPosition {
-	x: number;
-	y: number;
+  x: number;
+  y: number;
 }

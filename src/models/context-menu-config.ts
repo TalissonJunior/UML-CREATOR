@@ -1,4 +1,4 @@
 export class ContextMenuConfig {
-	onClose: () => void;
-	onOpen: () => void;
+  onClose: () => void;
+  onOpen: () => void;
 }
