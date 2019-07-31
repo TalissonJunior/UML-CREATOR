@@ -8,24 +8,24 @@ export const createDefault = (
 ): UML => {
   return new UML({
     key: key,
-    name: 'classname',
+    name: 'ClassName',
     methods: [
       {
-        name: 'method',
-        type: 'type',
+        name: 'Method',
+        type: 'Type',
         visibility: 'public',
         parameters: [
           {
             name: 'parameter',
-            type: 'type'
+            type: 'Type'
           }
         ]
       }
     ],
     properties: [
       {
-        name: 'property',
-        type: 'type',
+        name: 'Property',
+        type: 'Type',
         visibility: 'public'
       }
     ],

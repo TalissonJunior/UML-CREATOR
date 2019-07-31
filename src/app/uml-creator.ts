@@ -3,6 +3,8 @@ import { UMLProperty } from '../models/uml-property';
 import { UMLMethod } from '../models/uml-method';
 import { Utils } from './utils';
 import { ContextMenu } from './context-menu';
+import { createDefaultMethod } from '../mocks/default-method';
+import { createDefaultProperty } from '../mocks/default-property';
 
 declare const d3;
 
@@ -51,6 +53,8 @@ export class UMLCreator {
   }
 
   private create(parent: any): any {
+    const selfContext = this;
+
     const group = parent
       .append('g')
       .attrs({
@@ -69,13 +73,13 @@ export class UMLCreator {
           {
             title: 'Add Property',
             action: () => {
-              // Todo add input to create property
+              selfContext.addRemoveProperty();
             }
           },
           {
             title: 'Add Method',
             action: () => {
-              // Todo add input to create method
+              selfContext.addRemoveMethod();
             }
           },
           {
@@ -155,6 +159,8 @@ export class UMLCreator {
     element: any,
     properties: Array<UMLProperty>
   ): Array<any> {
+    const selfContext = this;
+
     // Group elements
     const group = element.append('g').attr('type', 'properties');
 
@@ -226,6 +232,16 @@ export class UMLCreator {
 
         const newWidth = this.getInputPropertyWidth(property);
         this.updateWidth(foreignObject, newWidth);
+      })
+      .on('contextmenu', function(property: UMLProperty) {
+        new ContextMenu([
+          {
+            title: 'Remove',
+            action: () => {
+              selfContext.addRemoveProperty(property.key);
+            }
+          }
+        ]);
       });
 
     return group;
@@ -236,6 +252,8 @@ export class UMLCreator {
     element: any,
     methods: Array<UMLMethod>
   ): any {
+    const selfContext = this;
+
     // Group elements
     const group = element.append('g').attr('type', 'methods');
 
@@ -282,7 +300,7 @@ export class UMLCreator {
               (previousValue, currentValue) => previousValue + currentValue
             );
 
-        return minMethodSize * this.pixelByLetter + this.padding + 10;
+        return minMethodSize * this.pixelByLetter + this.padding + 15;
       })
       .attr('height', this.inputHeight)
       .append('xhtml:div')
@@ -297,9 +315,6 @@ export class UMLCreator {
         });
 
         const methodType = method.type ? ': ' + method.type : '';
-
-        method.type = '';
-        method.parameters = [];
 
         return (
           this.getVisibilitySymbol(method.visibility) +
@@ -319,17 +334,28 @@ export class UMLCreator {
         }, 200);
       })
       // Updates input width based on the new value
-      .on('input', (property: UMLProperty) => {
-        const foreignObject = d3.select(`foreignObject[key="${property.key}"]`);
+      .on('input', (method: UMLMethod) => {
+        const foreignObject = d3.select(`foreignObject[key="${method.key}"]`);
         const element = foreignObject.select(
-          `input[key="${property.key}_input"]`
+          `input[key="${method.key}_input"]`
         );
 
-        property.name = element.node().value;
-        property.type = '';
+        method.name = element.node().value;
+        method.type = '';
+        method.parameters = [];
 
-        const newWidth = this.getInputPropertyWidth(property);
+        const newWidth = this.getInputPropertyWidth(method);
         this.updateWidth(foreignObject, newWidth);
+      })
+      .on('contextmenu', function(method: UMLMethod) {
+        new ContextMenu([
+          {
+            title: 'Remove',
+            action: () => {
+              selfContext.addRemoveMethod(method.key);
+            }
+          }
+        ]);
       });
 
     return group;
@@ -418,7 +444,79 @@ export class UMLCreator {
     element.call(drag);
   }
 
-  private getInputPropertyWidth(property: UMLProperty): number {
+  private addRemoveProperty(propertyKeyToRemove?: string | number) {
+    let hasUpdateProperties = false;
+
+    if (propertyKeyToRemove) {
+      const index = this.uml.properties.findIndex(
+        property => property.key == propertyKeyToRemove
+      );
+
+      if (index > -1) {
+        this.uml.properties.splice(index, 1);
+        hasUpdateProperties = true;
+      }
+    } else {
+      this.uml.properties.push(createDefaultProperty());
+      hasUpdateProperties = true;
+    }
+
+    if (hasUpdateProperties) {
+      // Remove the previous properties
+      d3.select(`[key="${this.uml.key}"]`)
+        .select('[type="properties"]')
+        .remove();
+
+      // Remove the previous methods
+      d3.select(`[key="${this.uml.key}"]`)
+        .select('[type="methods"]')
+        .remove();
+
+      // Calculate properties height
+      this.propertiesHeight = this.uml.properties.length * this.inputHeight;
+
+      // Calculate methods height
+      this.methodsHeight =
+        this.uml.methods.length * (this.inputHeight + this.padding);
+
+      this.addProperties(this.uml.key, this.self, this.uml.properties);
+
+      this.addMethods(this.uml.key, this.self, this.uml.methods);
+    }
+  }
+
+  private addRemoveMethod(methodKeyToRemove?: string | number) {
+    let hasUpdateMethods = false;
+
+    if (methodKeyToRemove) {
+      const index = this.uml.methods.findIndex(
+        method => method.key == methodKeyToRemove
+      );
+
+      if (index > -1) {
+        this.uml.methods.splice(index, 1);
+        hasUpdateMethods = true;
+      }
+    } else {
+      this.uml.methods.push(createDefaultMethod());
+      hasUpdateMethods = true;
+    }
+
+    if (hasUpdateMethods) {
+      // Remove the previous methods
+      d3.select(`[key="${this.uml.key}"]`)
+        .select('[type="methods"]')
+        .remove();
+
+      // Calculate methods height
+      this.methodsHeight =
+        this.uml.methods.length * (this.inputHeight + this.padding);
+
+      this.addMethods(this.uml.key, this.self, this.uml.methods);
+    }
+  }
+
+  private getInputPropertyWidth(property: UMLProperty | UMLMethod): number {
     return (
       (property.name.length + property.type.length) * this.pixelByLetter +
       this.padding
@@ -469,6 +567,6 @@ export class UMLCreator {
     const minWidth =
       minSize > this.uml.name.length ? minSize : this.uml.name.length;
 
-    return minWidth * this.pixelByLetter + this.padding + 15;
+    return minWidth * this.pixelByLetter + this.padding + 20;
   }
 }

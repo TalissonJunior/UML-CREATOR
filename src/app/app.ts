@@ -46,7 +46,6 @@ class App {
           // Close context menu if it is open
           new ContextMenu('close');
 
-          d3.select('body').attr('zoom', d3.event.transform.k);
           container.attr('transform', d3.event.transform);
         })
       )

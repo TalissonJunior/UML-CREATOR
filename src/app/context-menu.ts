@@ -48,12 +48,6 @@ export class ContextMenu {
       .style('top', d3.event ? d3.event.pageY - 2 + 'px' : 0 + 'px')
       .style('display', 'block');
 
-    const scale = d3.select('body').attr('zoom');
-
-    if (scale) {
-      d3.select('.d3-context-menu').style('transform', `scale(${scale})`);
-    }
-
     if (d3.event) {
       d3.event.preventDefault();
       d3.event.stopPropagation();
