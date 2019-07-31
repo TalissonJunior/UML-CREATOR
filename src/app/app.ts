@@ -43,10 +43,14 @@ class App {
       // Add zoom
       .call(
         d3.zoom().on('zoom', () => {
+          const canZoom = d3.select('body').attr('canZoom');
+
           // Close context menu if it is open
           new ContextMenu('close');
 
-          container.attr('transform', d3.event.transform);
+          if (canZoom != 'false' || canZoom == 'true') {
+            container.attr('transform', d3.event.transform);
+          }
         })
       )
       .append('g');

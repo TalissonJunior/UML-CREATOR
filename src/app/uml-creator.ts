@@ -5,6 +5,9 @@ import { Utils } from './utils';
 import { ContextMenu } from './context-menu';
 import { createDefaultMethod } from '../mocks/default-method';
 import { createDefaultProperty } from '../mocks/default-property';
+import { PropertyVisibility } from '../enums/property-visibility';
+import { PropertyVisibilitySymbol } from '../enums/property-visibility-symbol';
+import { UMLParameter } from '../models/uml-parameter';
 
 declare const d3;
 
@@ -40,6 +43,8 @@ export class UMLCreator {
 
     this.width =
       this.minRequiredWidth > this.width ? this.minRequiredWidth : this.width;
+
+    this.width = this.width + this.padding + 15;
 
     // Calculate properties height
     this.propertiesHeight = uml.properties.length * this.inputHeight;
@@ -132,11 +137,13 @@ export class UMLCreator {
       // Remove drag on focus to avoid visual bugs
       .on('focus', () => {
         this.self.attr('drag', false);
+        d3.select('body').attr('canZoom', false);
       })
       // Add drag on focus out to avoid visual bugs
       .on('focusout', () => {
         setTimeout(() => {
           this.self.attr('drag', true);
+          d3.select('body').attr('canZoom', true);
         }, 200);
       })
       // Updates input width based on the new value
@@ -194,8 +201,10 @@ export class UMLCreator {
         (property: UMLProperty, index: number) =>
           (index + 1.3) * this.inputHeight + 'px'
       )
-      .attr('width', (property: UMLProperty) =>
-        this.getInputPropertyWidth(property)
+      .attr(
+        'width',
+        (property: UMLProperty) =>
+          this.getInputPropertyWidth(property) + this.padding + 15
       )
       .attr('height', this.inputHeight)
       .append('xhtml:div')
@@ -213,11 +222,13 @@ export class UMLCreator {
       // Remove drag on focus to avoid visual bugs
       .on('focus', () => {
         this.self.attr('drag', false);
+        d3.select('body').attr('canZoom', false);
       })
       // Add drag on focus out to avoid visual bugs
       .on('focusout', () => {
         setTimeout(() => {
           this.self.attr('drag', true);
+          d3.select('body').attr('canZoom', true);
         }, 200);
       })
       // Updates input width based on the new value
@@ -230,7 +241,7 @@ export class UMLCreator {
         property.name = element.node().value;
         property.type = '';
 
-        const newWidth = this.getInputPropertyWidth(property);
+        const newWidth = this.getInputPropertyWidth(property) + this.padding;
         this.updateWidth(foreignObject, newWidth);
       })
       .on('contextmenu', function(property: UMLProperty) {
@@ -291,16 +302,23 @@ export class UMLCreator {
         );
       })
       .attr('width', (method: UMLMethod) => {
-        const minMethodSize =
-          method.name.length +
-          method.type.length +
-          method.parameters
-            .map(parameter => parameter.name.length + parameter.type.length)
-            .reduce(
-              (previousValue, currentValue) => previousValue + currentValue
-            );
+        let parametersSize = 0;
+        const parameters = method.parameters.map(
+          parameter => parameter.name.length + parameter.type.length
+        );
 
-        return minMethodSize * this.pixelByLetter + this.padding + 15;
+        if (parameters.length > 0) {
+          parametersSize = parameters.reduce(
+            (previousValue, currentValue) => previousValue + currentValue
+          );
+        }
+
+        const minMethodSize =
+          method.name.length + method.type.length + parametersSize;
+
+        const minSize = minMethodSize * this.pixelByLetter;
+
+        return minSize + this.padding + 15;
       })
       .attr('height', this.inputHeight)
       .append('xhtml:div')
@@ -314,7 +332,7 @@ export class UMLCreator {
           return parameter.name + ': ' + parameter.type;
         });
 
-        const methodType = method.type ? ': ' + method.type : '';
+        const methodType = method.type ? ': ' + method.type.trim() : '';
 
         return (
           this.getVisibilitySymbol(method.visibility) +
@@ -326,11 +344,13 @@ export class UMLCreator {
       // Remove drag on focus to avoid visual bugs
       .on('focus', () => {
         this.self.attr('drag', false);
+        d3.select('body').attr('canZoom', false);
       })
       // Add drag on focus out to avoid visual bugs
       .on('focusout', () => {
         setTimeout(() => {
           this.self.attr('drag', true);
+          d3.select('body').attr('canZoom', true);
         }, 200);
       })
       // Updates input width based on the new value
@@ -344,8 +364,8 @@ export class UMLCreator {
         method.type = '';
         method.parameters = [];
 
-        const newWidth = this.getInputPropertyWidth(method);
-        this.updateWidth(foreignObject, newWidth);
+        const newWidth = this.getInputPropertyWidth(method) - this.padding * 3;
+        this.updateWidth(foreignObject, newWidth + this.padding);
       })
       .on('contextmenu', function(method: UMLMethod) {
         new ContextMenu([
@@ -380,28 +400,20 @@ export class UMLCreator {
 
     // Check if the new width is less then the minimum
     if (newWidth < minimumRequiredWidth) {
-      containersWidth = minimumRequiredWidth;
+      containersWidth = minimumRequiredWidth + this.padding + 15;
     }
 
-    this.self.attr('width', containersWidth + this.padding);
-    backgroundHeaderElement.attr('width', containersWidth + this.padding);
-    backgroundPropElement.attr('width', containersWidth + this.padding);
-    backgroundMethodElement.attr('width', containersWidth + this.padding);
+    this.self.attr('width', containersWidth);
+    backgroundHeaderElement.attr('width', containersWidth);
+    backgroundPropElement.attr('width', containersWidth);
+    backgroundMethodElement.attr('width', containersWidth);
+
+    const headerInputWidth = this.uml.name.length * this.pixelByLetter;
 
     // Calculates header margin to align center
-    const margin =
-      (containersWidth -
-        this.uml.name.length * this.pixelByLetter +
-        this.padding) /
-      2;
+    const margin = (containersWidth - headerInputWidth) / 2;
 
-    // Calculates header width based on margin to align center
-    const headerWidth =
-      newWidth < minimumRequiredWidth
-        ? containersWidth - margin
-        : newWidth - margin;
-
-    headerElement.attr('width', headerWidth);
+    headerElement.attr('width', headerInputWidth);
     headerElement.attr('x', margin);
 
     // Updates the current input width
@@ -462,6 +474,11 @@ export class UMLCreator {
     }
 
     if (hasUpdateProperties) {
+      // Remove the previous header
+      d3.select(`[key="${this.uml.key}"]`)
+        .select('[type="header"]')
+        .remove();
+
       // Remove the previous properties
       d3.select(`[key="${this.uml.key}"]`)
         .select('[type="properties"]')
@@ -477,10 +494,12 @@ export class UMLCreator {
 
       // Calculate methods height
       this.methodsHeight =
-        this.uml.methods.length * (this.inputHeight + this.padding);
+        this.uml.methods.length * this.inputHeight + this.padding;
 
+      this.uml = this.formatPropertiesAndMethods(this.uml);
+
+      this.addHeader(this.uml.key, this.self, this.uml.name);
       this.addProperties(this.uml.key, this.self, this.uml.properties);
-
       this.addMethods(this.uml.key, this.self, this.uml.methods);
     }
   }
@@ -503,24 +522,169 @@ export class UMLCreator {
     }
 
     if (hasUpdateMethods) {
+      // Remove the previous header
+      d3.select(`[key="${this.uml.key}"]`)
+        .select('[type="header"]')
+        .remove();
+
+      // Remove the previous properties
+      d3.select(`[key="${this.uml.key}"]`)
+        .select('[type="properties"]')
+        .remove();
+
       // Remove the previous methods
       d3.select(`[key="${this.uml.key}"]`)
         .select('[type="methods"]')
         .remove();
 
+      // Calculate properties height
+      this.propertiesHeight = this.uml.properties.length * this.inputHeight;
+
       // Calculate methods height
       this.methodsHeight =
-        this.uml.methods.length * (this.inputHeight + this.padding);
+        this.uml.methods.length * this.inputHeight + this.padding;
 
+      this.uml = this.formatPropertiesAndMethods(this.uml);
+
+      this.addHeader(this.uml.key, this.self, this.uml.name);
+      this.addProperties(this.uml.key, this.self, this.uml.properties);
       this.addMethods(this.uml.key, this.self, this.uml.methods);
     }
   }
 
+  // Each time user change a value of a property, the UMLCreator
+  // will put the value on property.name and reset property.type, property.visibility
+  // so this function will put back the value to its place
+  // ex of property when user inputs value:
+  // value: + teste: String
+  // property: { name: '+ teste: String', type: '', visibility: ''}
+  // After using this function the property will be:
+  // property: { name: 'teste', type: 'String', visibility: '+'}
+  // this rule applies to methods to
+  private formatPropertiesAndMethods(uml: UML): UML {
+    // Handle properties format
+    for (let index = 0; index < uml.properties.length; index++) {
+      let property = uml.properties[index];
+      const arrayNameAndType = property.name.split(':');
+
+      // If length is bigger then 1 is because name contains '[propertyName] | [type]'
+      if (arrayNameAndType.length > 1) {
+        property.type = arrayNameAndType[1].trim();
+
+        const arrayNameVisib = arrayNameAndType[0].trim().split(' ');
+
+        // If length is bigger then 1 is because
+        // arrayNameAndType contains '[visibilitySymbol] | [propertyName]'
+        if (arrayNameVisib.length > 1) {
+          switch (arrayNameVisib[0].trim().toLowerCase()) {
+            case PropertyVisibilitySymbol.public:
+              property.visibility = PropertyVisibility.public;
+              break;
+            case PropertyVisibilitySymbol.private:
+              property.visibility = PropertyVisibility.private;
+              break;
+            case PropertyVisibilitySymbol.protected:
+              property.visibility = PropertyVisibility.protected;
+              break;
+            default:
+              property.visibility = '';
+              break;
+          }
+
+          property.name = arrayNameVisib[1].trim();
+        }
+        // Else it only contains the '[propertyName]'
+        else {
+          property.name = arrayNameAndType[0].trim();
+        }
+      }
+
+      uml.properties[index] = property;
+    }
+
+    // Handle methods format
+    for (let index = 0; index < uml.methods.length; index++) {
+      let method = uml.methods[index];
+
+      if (method.type == '' && method.parameters.length == 0) {
+        //arrayNameAndParameters contains '[visibilitySymbol methodName ]| [parameter: Type): Type]'
+        const arrayNameAndParameters = method.name.split('(');
+
+        // arrayNameVisib contains '[visibilitySymbol] | [ methodName ]'
+        const arrayNameVisib = arrayNameAndParameters[0].trim().split(' ');
+
+        // If length is bigger then 1 is because
+        // arrayNameAndType contains '[visibilitySymbol] | [ methodName ]'
+        if (arrayNameVisib.length > 1) {
+          method.name = arrayNameVisib[1].trim();
+
+          switch (arrayNameVisib[0].trim().toLowerCase()) {
+            case PropertyVisibilitySymbol.public:
+              method.visibility = PropertyVisibility.public;
+              break;
+            case PropertyVisibilitySymbol.private:
+              method.visibility = PropertyVisibility.private;
+              break;
+            case PropertyVisibilitySymbol.protected:
+              method.visibility = PropertyVisibility.protected;
+              break;
+            default:
+              method.visibility = '';
+              break;
+          }
+        } else {
+          method.name = arrayNameVisib[0].trim();
+        }
+
+        // arrayNameAndParameters contains
+        // '[visibilitySymbol methodName ]| [parameter: Type): Type]'
+        if (arrayNameAndParameters.length > 1) {
+          // Handle parameters and method type
+          const arrayParametersAndMethodType = arrayNameAndParameters[1]
+            .trim()
+            .split(')');
+
+          // arrayParametersAndType[0] contains '[parameter: Type, parameter2:type]'
+          const arrayParametersAndType = arrayParametersAndMethodType[0]
+            .trim()
+            .split(',');
+
+          for (let index = 0; index < arrayParametersAndType.length; index++) {
+            const arrayParamNameType = arrayParametersAndType[index].split(':');
+            let type = '';
+            const name = arrayParamNameType[0].trim();
+
+            if (arrayParamNameType.length > 1) {
+              type = arrayParamNameType[1].trim();
+            }
+
+            if (name || type) {
+              method.parameters.push(new UMLParameter({ name, type }));
+            }
+          }
+
+          // If length is bigger then 1 its because arrayParametersAndType
+          // contains '[parameter: Type, parameter2:type] | [:Type]'
+          if (arrayParametersAndMethodType.length > 1) {
+            let type = arrayParametersAndMethodType[1].trim();
+            method.type = type.indexOf(':') == 0 ? type.substring(1) : type;
+          }
+        }
+        // Else it only contains the 'methodName'
+        else {
+          method.name = arrayNameVisib[0].trim();
+        }
+      }
+    }
+
+    return uml;
+  }
+
   private getInputPropertyWidth(property: UMLProperty | UMLMethod): number {
-    return (
-      (property.name.length + property.type.length) * this.pixelByLetter +
-      this.padding
-    );
+    const size =
+      (property.name.length + property.type.length) * this.pixelByLetter;
+
+    return size;
   }
 
   private getVisibilitySymbol(visibility: string) {
@@ -529,12 +693,12 @@ export class UMLCreator {
     }
 
     switch (visibility.toLowerCase()) {
-      case 'public':
-        return '+ ';
-      case 'private':
-        return '- ';
-      case 'protected':
-        return '# ';
+      case PropertyVisibility.public:
+        return PropertyVisibilitySymbol.public + ' ';
+      case PropertyVisibility.private:
+        return PropertyVisibilitySymbol.private + ' ';
+      case PropertyVisibility.protected:
+        return PropertyVisibilitySymbol.protected + ' ';
       default:
         return ' ';
     }
@@ -549,16 +713,20 @@ export class UMLCreator {
     );
 
     const minMethodSize = Math.max(
-      ...this.uml.methods.map(
-        method =>
-          method.name.length +
-          method.type.length +
-          method.parameters
-            .map(parameter => parameter.name.length + parameter.type.length)
-            .reduce(
-              (previousValue, currentValue) => previousValue + currentValue
-            )
-      )
+      ...this.uml.methods.map(method => {
+        let parametersSize = 0;
+        const parameters = method.parameters.map(
+          parameter => parameter.name.length + parameter.type.length
+        );
+
+        if (parameters.length > 0) {
+          parametersSize = parameters.reduce(
+            (previousValue, currentValue) => previousValue + currentValue
+          );
+        }
+
+        return method.name.length + method.type.length + parametersSize;
+      })
     );
 
     const minSize =
@@ -567,6 +735,8 @@ export class UMLCreator {
     const minWidth =
       minSize > this.uml.name.length ? minSize : this.uml.name.length;
 
-    return minWidth * this.pixelByLetter + this.padding + 20;
+    const mult = minWidth * this.pixelByLetter;
+
+    return mult + this.padding;
   }
 }
