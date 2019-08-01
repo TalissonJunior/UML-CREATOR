@@ -14,11 +14,11 @@ declare const d3;
 export class UMLCreator {
   // Yellow
   private bgColor = '#FFFFE0';
-  private borderColor = '#000000';
+  public defaultBorderColor = '#000000';
   // Used to calculate width when input value changes
   private pixelByLetter = 8;
-  private width = 100;
-  private height = 50;
+  public width = 100;
+  public height = 50;
   // Height of header container
   private headerHeight = 30;
   // Height of properties container
@@ -29,13 +29,13 @@ export class UMLCreator {
   private inputHeight = 25;
   private padding = 10;
   // Holds a instance of it self
-  private self: any;
+  public instance: any;
   // Holds the uml data
-  private uml: UML;
+  public uml: UML;
 
   constructor(uml: UML, parentContainer: any) {
     this.initialConfig(uml);
-    this.self = this.create(parentContainer);
+    this.instance = this.create(parentContainer);
   }
 
   private initialConfig(uml: UML): void {
@@ -100,8 +100,30 @@ export class UMLCreator {
     this.addProperties(this.uml.key, group, this.uml.properties);
     this.addMethods(this.uml.key, group, this.uml.methods);
     this.bindDrag(group);
+    this.addBorder(group);
 
     return group;
+  }
+
+  public changeBorderColor(color: string): any {
+    this.instance.select('[type="border"]').attr('stroke', color);
+  }
+
+  public getBorderColor(): string {
+    return this.instance.select('[type="border"]').attr('stroke');
+  }
+
+  private addBorder(element: any): any {
+    element.append('rect').attrs({
+      key: 'border',
+      type: 'border',
+      stroke: this.defaultBorderColor,
+      'stroke-width': '1px',
+      height: this.height,
+      width: this.width,
+      fill: 'none',
+      style: 'cursor:grab;'
+    });
   }
 
   private addHeader(key: string | number, element: any, title: string): any {
@@ -111,7 +133,7 @@ export class UMLCreator {
     // Add background to the group
     group.append('rect').attrs({
       type: 'back-header',
-      stroke: this.borderColor,
+      stroke: this.defaultBorderColor,
       'stroke-width': '1px',
       height: this.headerHeight,
       width: this.width,
@@ -136,13 +158,13 @@ export class UMLCreator {
       .attr('value', title)
       // Remove drag on focus to avoid visual bugs
       .on('focus', () => {
-        this.self.attr('drag', false);
+        this.instance.attr('drag', false);
         d3.select('body').attr('canZoom', false);
       })
       // Add drag on focus out to avoid visual bugs
       .on('focusout', () => {
         setTimeout(() => {
-          this.self.attr('drag', true);
+          this.instance.attr('drag', true);
           d3.select('body').attr('canZoom', true);
         }, 200);
       })
@@ -174,7 +196,7 @@ export class UMLCreator {
     // Add background to the group
     group.append('rect').attrs({
       type: 'back-properties',
-      stroke: this.borderColor,
+      stroke: this.defaultBorderColor,
       'stroke-width': '1px',
       height: this.propertiesHeight,
       width: this.width,
@@ -221,13 +243,13 @@ export class UMLCreator {
       )
       // Remove drag on focus to avoid visual bugs
       .on('focus', () => {
-        this.self.attr('drag', false);
+        this.instance.attr('drag', false);
         d3.select('body').attr('canZoom', false);
       })
       // Add drag on focus out to avoid visual bugs
       .on('focusout', () => {
         setTimeout(() => {
-          this.self.attr('drag', true);
+          this.instance.attr('drag', true);
           d3.select('body').attr('canZoom', true);
         }, 200);
       })
@@ -271,7 +293,7 @@ export class UMLCreator {
     // Add background to the group
     group.append('rect').attrs({
       type: 'back-methods',
-      stroke: this.borderColor,
+      stroke: this.defaultBorderColor,
       'stroke-width': '1px',
       height: this.methodsHeight,
       width: this.width,
@@ -343,13 +365,13 @@ export class UMLCreator {
       })
       // Remove drag on focus to avoid visual bugs
       .on('focus', () => {
-        this.self.attr('drag', false);
+        this.instance.attr('drag', false);
         d3.select('body').attr('canZoom', false);
       })
       // Add drag on focus out to avoid visual bugs
       .on('focusout', () => {
         setTimeout(() => {
-          this.self.attr('drag', true);
+          this.instance.attr('drag', true);
           d3.select('body').attr('canZoom', true);
         }, 200);
       })
@@ -385,14 +407,14 @@ export class UMLCreator {
   // on the property value;
   private updateWidth(currentForeignObject: any, newWidth: number) {
     let containersWidth = newWidth;
-    const headerElement = this.self.select('[type="header"] foreignObject');
-    const backgroundHeaderElement = this.self.select(
+    const headerElement = this.instance.select('[type="header"] foreignObject');
+    const backgroundHeaderElement = this.instance.select(
       'rect[type="back-header"]'
     );
-    const backgroundPropElement = this.self.select(
+    const backgroundPropElement = this.instance.select(
       'rect[type="back-properties"]'
     );
-    const backgroundMethodElement = this.self.select(
+    const backgroundMethodElement = this.instance.select(
       'rect[type="back-methods"]'
     );
 
@@ -403,10 +425,11 @@ export class UMLCreator {
       containersWidth = minimumRequiredWidth + this.padding + 15;
     }
 
-    this.self.attr('width', containersWidth);
+    this.instance.attr('width', containersWidth);
     backgroundHeaderElement.attr('width', containersWidth);
     backgroundPropElement.attr('width', containersWidth);
     backgroundMethodElement.attr('width', containersWidth);
+    this.instance.select('[type="border"]').attr('width', containersWidth);
 
     const headerInputWidth = this.uml.name.length * this.pixelByLetter;
 
@@ -498,9 +521,9 @@ export class UMLCreator {
 
       this.uml = this.formatPropertiesAndMethods(this.uml);
 
-      this.addHeader(this.uml.key, this.self, this.uml.name);
-      this.addProperties(this.uml.key, this.self, this.uml.properties);
-      this.addMethods(this.uml.key, this.self, this.uml.methods);
+      this.addHeader(this.uml.key, this.instance, this.uml.name);
+      this.addProperties(this.uml.key, this.instance, this.uml.properties);
+      this.addMethods(this.uml.key, this.instance, this.uml.methods);
     }
   }
 
@@ -546,9 +569,9 @@ export class UMLCreator {
 
       this.uml = this.formatPropertiesAndMethods(this.uml);
 
-      this.addHeader(this.uml.key, this.self, this.uml.name);
-      this.addProperties(this.uml.key, this.self, this.uml.properties);
-      this.addMethods(this.uml.key, this.self, this.uml.methods);
+      this.addHeader(this.uml.key, this.instance, this.uml.name);
+      this.addProperties(this.uml.key, this.instance, this.uml.properties);
+      this.addMethods(this.uml.key, this.instance, this.uml.methods);
     }
   }
 

@@ -9,12 +9,13 @@ class App {
   svgContainer;
   workspaceElement: HTMLElement;
   umlMenuItemElement: HTMLElement;
+  activeColor = '#FF9800';
   lastId: number;
-  data: Array<UML>;
+  nodes: Array<UML>;
 
   constructor() {
     this.svgContainer = this.create();
-    this.data = new Array<UML>();
+    this.nodes = new Array<UML>();
     this.lastId = 0;
   }
 
@@ -63,6 +64,21 @@ class App {
       });
     });
 
+    // Creates an arrow;
+    d3.select('svg')
+      .append('svg:defs')
+      .append('svg:marker')
+      .attr('id', 'triangle')
+      .attr('refX', 3)
+      .attr('refY', 3)
+      .attr('markerWidth', 30)
+      .attr('markerHeight', 30)
+      .attr('orient', 'auto')
+      .append('path')
+      .attr('d', 'M 0 0 6 3 0 6 1.5 3')
+      .style('cursor', 'pointer')
+      .style('fill', '#FF9800');
+
     return container;
   }
 
@@ -75,9 +91,77 @@ class App {
 
     const newUML = createDefault(this.lastId, { x: event.x, y: event.y });
 
-    this.data.push(newUML);
+    this.nodes.push(newUML);
 
-    new UMLCreator(newUML, this.svgContainer);
+    const umlCreator = new UMLCreator(newUML, this.svgContainer);
+
+    umlCreator.instance.on('click', () => {
+      const arrowInitialPos = 10;
+      const arrowFinalPos = 30;
+
+      // Resets to default
+      if (umlCreator.getBorderColor() == this.activeColor) {
+        umlCreator.instance.select('[key="arrow-top"]').remove();
+        umlCreator.instance.select('[key="arrow-right"]').remove();
+        umlCreator.instance.select('[key="arrow-left"]').remove();
+        umlCreator.instance.select('[key="arrow-bottom"]').remove();
+        umlCreator.changeBorderColor(umlCreator.defaultBorderColor);
+      } else {
+        umlCreator.changeBorderColor(this.activeColor);
+
+        // Arrow top
+        umlCreator.instance
+          .append('line')
+          .style('stroke', '#FF9800')
+          .style('cursor', 'pointer')
+          .attr('key', 'arrow-top')
+          .attr('x1', umlCreator.width / 2)
+          .attr('y1', -arrowInitialPos)
+          .attr('x2', umlCreator.width / 2)
+          .attr('y2', -arrowFinalPos)
+          .attr('marker-end', 'url(#triangle)')
+          .attr('stroke-width', 2);
+
+        // Arrow right
+        umlCreator.instance
+          .append('line')
+          .style('stroke', '#FF9800')
+          .style('cursor', 'pointer')
+          .attr('key', 'arrow-right')
+          .attr('x1', umlCreator.width + arrowInitialPos)
+          .attr('y1', umlCreator.height / 2)
+          .attr('x2', umlCreator.width + arrowFinalPos)
+          .attr('y2', umlCreator.height / 2)
+          .attr('marker-end', 'url(#triangle)')
+          .attr('stroke-width', 2);
+
+        // Arrow bottom
+        umlCreator.instance
+          .append('line')
+          .style('stroke', '#FF9800')
+          .style('cursor', 'pointer')
+          .attr('key', 'arrow-bottom')
+          .attr('x1', umlCreator.width / 2)
+          .attr('y1', umlCreator.height + arrowInitialPos)
+          .attr('x2', umlCreator.width / 2)
+          .attr('y2', umlCreator.height + arrowFinalPos)
+          .attr('marker-end', 'url(#triangle)')
+          .attr('stroke-width', 2);
+
+        // Arrow left
+        umlCreator.instance
+          .append('line')
+          .style('stroke', '#FF9800')
+          .style('cursor', 'pointer')
+          .attr('key', 'arrow-left')
+          .attr('x1', -arrowInitialPos)
+          .attr('y1', umlCreator.height / 2)
+          .attr('x2', -arrowFinalPos)
+          .attr('y2', umlCreator.height / 2)
+          .attr('marker-end', 'url(#triangle)')
+          .attr('stroke-width', 2);
+      }
+    });
   }
 }
 
