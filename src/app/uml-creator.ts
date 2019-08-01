@@ -8,6 +8,7 @@ import { createDefaultProperty } from '../mocks/default-property';
 import { PropertyVisibility } from '../enums/property-visibility';
 import { PropertyVisibilitySymbol } from '../enums/property-visibility-symbol';
 import { UMLParameter } from '../models/uml-parameter';
+import { UMLPosition } from '../models/uml-position';
 
 declare const d3;
 
@@ -66,7 +67,6 @@ export class UMLCreator {
         key: this.uml.key,
         height: this.height,
         width: this.width,
-        drag: true,
         x: this.uml.position.x,
         y: this.uml.position.y,
         transform: `translate(
@@ -103,6 +103,15 @@ export class UMLCreator {
     this.addBorder(group);
 
     return group;
+  }
+
+  public enableDrag(): void {
+    this.bindDrag(this.instance);
+  }
+
+  public disableDrag(): void {
+    this.instance.on('mousedown.start', null);
+    this.instance.on('mousedown.drag', null);
   }
 
   public changeBorderColor(color: string): any {
@@ -158,13 +167,13 @@ export class UMLCreator {
       .attr('value', title)
       // Remove drag on focus to avoid visual bugs
       .on('focus', () => {
-        this.instance.attr('drag', false);
+        this.disableDrag();
         d3.select('body').attr('canZoom', false);
       })
       // Add drag on focus out to avoid visual bugs
       .on('focusout', () => {
         setTimeout(() => {
-          this.instance.attr('drag', true);
+          this.enableDrag();
           d3.select('body').attr('canZoom', true);
         }, 200);
       })
@@ -243,13 +252,13 @@ export class UMLCreator {
       )
       // Remove drag on focus to avoid visual bugs
       .on('focus', () => {
-        this.instance.attr('drag', false);
+        this.disableDrag();
         d3.select('body').attr('canZoom', false);
       })
       // Add drag on focus out to avoid visual bugs
       .on('focusout', () => {
         setTimeout(() => {
-          this.instance.attr('drag', true);
+          this.enableDrag();
           d3.select('body').attr('canZoom', true);
         }, 200);
       })
@@ -365,13 +374,13 @@ export class UMLCreator {
       })
       // Remove drag on focus to avoid visual bugs
       .on('focus', () => {
-        this.instance.attr('drag', false);
+        this.disableDrag();
         d3.select('body').attr('canZoom', false);
       })
       // Add drag on focus out to avoid visual bugs
       .on('focusout', () => {
         setTimeout(() => {
-          this.instance.attr('drag', true);
+          this.enableDrag();
           d3.select('body').attr('canZoom', true);
         }, 200);
       })
@@ -443,37 +452,34 @@ export class UMLCreator {
     currentForeignObject.attr('width', newWidth);
   }
 
-  // Tip: After binding the drag, use the attribute 'drag' to disable or enable it
   private bindDrag(element: any): void {
     let deltaX, deltaY;
 
     const drag = d3
       .drag()
       .on('start', () => {
-        const canDrag = element.attr('drag') == 'true' ? true : false;
-
         // Close context menu if it is open
         new ContextMenu('close');
 
-        if (!canDrag) return;
-
         deltaX = (element.attr('x') as any) - d3.event.x;
         deltaY = (element.attr('y') as any) - d3.event.y;
+
+        element.attr('x', deltaX).attr('y', deltaY);
+        this.uml.position = new UMLPosition({ x: deltaX, y: deltaY });
       })
       .on('drag', () => {
-        const canDrag = element.attr('drag') == 'true' ? true : false;
         const x = d3.event.x + deltaX;
         const y = d3.event.y + deltaY;
 
         // Close context menu if it is open
         new ContextMenu('close');
 
-        if (!canDrag) return;
-
         element
           .attr('x', x)
           .attr('y', y)
           .attr('transform', `translate(${x},${y})`);
+
+        this.uml.position = new UMLPosition({ x, y });
       });
 
     element.call(drag);

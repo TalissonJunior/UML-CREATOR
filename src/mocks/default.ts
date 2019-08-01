@@ -2,10 +2,7 @@ import { UML } from '../models/uml';
 import { UMLPosition } from '../models/uml-position';
 
 // A empty default UML
-export const createDefault = (
-  key: number | string,
-  position: UMLPosition
-): UML => {
+export const createDefault = (key: number, position: UMLPosition): UML => {
   return new UML({
     key: key,
     name: 'ClassName',

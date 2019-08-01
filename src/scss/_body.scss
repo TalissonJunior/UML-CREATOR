@@ -8,4 +8,36 @@ html {
   background-color: $body-color;
   background-image: url('assets/bg.png');
   user-select: none;
+
+  svg {
+    cursor: default;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+  }
+
+  path.link {
+    fill: none;
+    stroke: #000;
+    stroke-width: 4px;
+    cursor: default;
+  }
+
+  svg:not(.active):not(.ctrl) path.link {
+    cursor: pointer;
+  }
+
+  path.link.selected {
+    stroke-dasharray: 10, 2;
+  }
+
+  path.link.dragline {
+    pointer-events: none;
+  }
+
+  path.link.hidden {
+    stroke-width: 0;
+  }
 }

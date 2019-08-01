@@ -1,5 +1,7 @@
 # build
 dist/
+.tmp/
+.tmp
 
 # dependecies
 node_modules/

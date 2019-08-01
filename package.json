@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "debug": "node --inspect-brk ./dist/winuvo.js",
-    "serve": "node node_modules/webpack/bin/webpack.js --watch",
-    "build": "node node_modules/webpack/bin/webpack.js"
+    "debug": "node --inspect-brk ./dist/umlCreator.min.js",
+    "serve": "node node_modules/webpack/bin/webpack.js --config buildtools/webpack.dev.js --watch",
+    "build": "node node_modules/webpack/bin/webpack.js --config buildtools/webpack.prod.js"
   },
   "keywords": [
     "uml",
