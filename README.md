@@ -4,7 +4,7 @@
 A UML Creator that manages UML Diagrams by outputting and inputting the draws as json file,  writting in Javascript using [Typescript](https://www.typescriptlang.org/) and [d3js](https://d3js.org/) 
 
 
-![Example](https://github.com/TalissonJunior/UML-CREATOR/tree/master/.github/example.jpg)
+![Example](https://raw.githubusercontent.com/TalissonJunior/UML-CREATOR/master/.github/example.jpg)
 
 ### Prerequisites
 
