@@ -15,6 +15,7 @@
   "author": "TalissonJunior",
   "license": "MIT",
   "devDependencies": {
+    "@babel/core": "^7.5.5",
     "@types/d3": "^5.7.2",
     "@types/d3-zoom": "^1.7.4",
     "babel-loader": "^8.0.6",
@@ -31,14 +32,13 @@
     "style-loader": "^0.23.1",
     "ts-loader": "^6.0.4",
     "tslint-webpack-plugin": "^2.1.0",
+    "typescript": "^3.5.3",
     "webpack": "^4.35.0",
     "webpack-cli": "^3.3.5",
     "webpack-dev-server": "^3.7.2",
     "webpack-merge": "^4.2.1"
   },
   "dependencies": {
-    "@babel/core": "^7.4.5",
-    "@types/d3-selection-multi": "^1.0.7",
     "d3": "^5.9.7",
     "d3-drag": "^1.2.3",
     "d3-selection-multi": "^1.0.1",
