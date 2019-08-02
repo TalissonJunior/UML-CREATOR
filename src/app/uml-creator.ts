@@ -431,9 +431,10 @@ export class UMLCreator {
 
     // Check if the new width is less then the minimum
     if (newWidth < minimumRequiredWidth) {
-      containersWidth = minimumRequiredWidth + this.padding + 15;
+      containersWidth = minimumRequiredWidth;
     }
 
+    this.width = containersWidth;
     this.instance.attr('width', containersWidth);
     backgroundHeaderElement.attr('width', containersWidth);
     backgroundPropElement.attr('width', containersWidth);
@@ -515,18 +516,16 @@ export class UMLCreator {
         .select('[type="methods"]')
         .remove();
 
-      // Calculate properties height
-      this.propertiesHeight = this.uml.properties.length * this.inputHeight;
-
-      // Calculate methods height
-      this.methodsHeight =
-        this.uml.methods.length * this.inputHeight + this.padding;
+      this.initialConfig(this.uml);
 
       this.uml = this.formatPropertiesAndMethods(this.uml);
+
+      this.instance.select('[key="border"]').remove();
 
       this.addHeader(this.uml.key, this.instance, this.uml.name);
       this.addProperties(this.uml.key, this.instance, this.uml.properties);
       this.addMethods(this.uml.key, this.instance, this.uml.methods);
+      this.addBorder(this.instance);
     }
   }
 
@@ -563,18 +562,16 @@ export class UMLCreator {
         .select('[type="methods"]')
         .remove();
 
-      // Calculate properties height
-      this.propertiesHeight = this.uml.properties.length * this.inputHeight;
-
-      // Calculate methods height
-      this.methodsHeight =
-        this.uml.methods.length * this.inputHeight + this.padding;
+      this.initialConfig(this.uml);
 
       this.uml = this.formatPropertiesAndMethods(this.uml);
+
+      this.instance.select('[key="border"]').remove();
 
       this.addHeader(this.uml.key, this.instance, this.uml.name);
       this.addProperties(this.uml.key, this.instance, this.uml.properties);
       this.addMethods(this.uml.key, this.instance, this.uml.methods);
+      this.addBorder(this.instance);
     }
   }
 
@@ -713,7 +710,7 @@ export class UMLCreator {
     return size;
   }
 
-  private getVisibilitySymbol(visibility: string) {
+  private getVisibilitySymbol(visibility: string): string {
     if (!visibility) {
       return ' ';
     }
