@@ -463,9 +463,6 @@ export class UMLCreator {
 
         deltaX = (element.attr('x') as any) - d3.event.x;
         deltaY = (element.attr('y') as any) - d3.event.y;
-
-        element.attr('x', deltaX).attr('y', deltaY);
-        this.uml.position = new UMLPosition({ x: deltaX, y: deltaY });
       })
       .on('drag', () => {
         const x = d3.event.x + deltaX;
