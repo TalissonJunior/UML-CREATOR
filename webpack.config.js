@@ -2,7 +2,7 @@ const tsLintPlugin = require('tslint-webpack-plugin');
 const PrettierPlugin = require("prettier-webpack-plugin");
 
 module.exports = {
-    entry: ['./src/app/app.ts', './src/scss/app.scss'],
+    entry: ['./src/scss/app.scss','./src/app/app.ts'],
     resolve: {
         extensions: ['.ts', '.js'],
     },
@@ -21,7 +21,7 @@ module.exports = {
         })
     ],
     output: {
-        library: 'umlCreator',
+        library: 'UmlCreator',
         libraryTarget: 'var'
     }
 };

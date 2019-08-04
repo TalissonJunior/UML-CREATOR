@@ -584,7 +584,7 @@ export class UMLCreator {
   // After using this function the property will be:
   // property: { name: 'teste', type: 'String', visibility: '+'}
   // this rule applies to methods to
-  private formatPropertiesAndMethods(uml: UML): UML {
+  public formatPropertiesAndMethods(uml: UML): UML {
     // Handle properties format
     for (let index = 0; index < uml.properties.length; index++) {
       let property = uml.properties[index];

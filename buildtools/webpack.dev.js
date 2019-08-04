@@ -52,7 +52,7 @@ module.exports = merge(common, {
     output: {
         filename: 'umlCreator.js',
         path: path.resolve(__dirname, '../.tmp'),
-        devtoolModuleFilenameTemplate: '[absolute-resource-path]'
+        devtoolModuleFilenameTemplate: '[absolute-resource-path]',
     },
     mode: 'development',
     devtool: 'inline-source-map'

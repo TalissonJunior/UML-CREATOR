@@ -4,28 +4,92 @@ import { UML } from '../models/uml';
 import { Link } from '../models/link';
 import { FakeLink } from '../models/fake-link';
 import { ContextMenu } from './context-menu';
+import { JsonUMLCreator } from '../models/jsonUMLCreator';
+import { Utils } from './utils';
 
 declare const d3;
 
 class App {
+  containeRef;
   svgContainer;
   workspaceElement: HTMLElement;
   umlMenuItemElement: HTMLElement;
-  nodesData: Array<UML>;
   nodes: Array<UMLCreator>;
   links: Array<Link>;
-  currentLink: FakeLink;
+  private nodesData: Array<UML>;
+  private currentLink: FakeLink;
 
-  constructor() {
+  constructor(containerReference?: string) {
     this.nodesData = new Array<UML>();
     this.nodes = new Array<UMLCreator>();
     this.links = new Array<Link>();
     this.currentLink = new FakeLink();
+
+    this.init(containerReference);
+
     this.svgContainer = this.create();
     this.addLinksConfiguation();
   }
 
-  init(): void {
+  public fromJson(json: JsonUMLCreator): void {
+    if (!json.data) {
+      throw 'Json must have a data property, ex. data: { nodes:[], links: [] }';
+    } else if (!Utils.isArray(json.data.nodes)) {
+      throw "Json property 'data.nodes' must be of type array, ex. data: { nodes:[], links: [] }";
+    } else if (json.data.links && !Utils.isArray(json.data.links)) {
+      throw "Json property 'data.links' must be of type array, ex. data: { nodes:[], links: [] }";
+    }
+
+    if (json.data.links && json.data.links.length > 0) {
+      this.links = json.data.links;
+    }
+
+    if (json.data.nodes && json.data.nodes.length > 0) {
+      json.data.nodes.forEach(umlNode => {
+        this.addNewUMLNode(umlNode);
+      });
+    }
+
+    this.restartLinks();
+  }
+
+  public toJson(): JsonUMLCreator {
+    if (!this.links && !this.nodes) {
+      return new JsonUMLCreator();
+    } else if (!this.nodes && this.links) {
+      return new JsonUMLCreator([], this.links);
+    }
+
+    const nodes = this.nodes.map(node => {
+      return node.formatPropertiesAndMethods(node.uml);
+    });
+
+    return new JsonUMLCreator(nodes, this.links);
+  }
+
+  private init(containerReference?: string): void {
+    this.containeRef = containerReference ? containerReference : 'body';
+
+    // add workspace area
+    d3.select(this.containeRef)
+      .append('xhtml:div')
+      .attrs({
+        id: 'uml_diagram_workspace',
+        class: 'uml-diagram-creator'
+      });
+
+    // add menu list
+    d3.select(this.containeRef)
+      .append('xhtml:ul')
+      .attr('class', 'uml-menu')
+      .append('li')
+      .append('span')
+      .attrs({
+        id: 'uml_menu_item',
+        draggable: 'true',
+        class: 'uml-class-icon'
+      });
+
     this.workspaceElement = document.getElementById('uml_diagram_workspace');
 
     // Menu drag listeners
@@ -34,10 +98,17 @@ class App {
     ) {
       event.preventDefault();
     });
-    this.workspaceElement.addEventListener(
-      'drop',
-      this.addNewUMLNode.bind(this)
-    );
+    this.workspaceElement.addEventListener('drop', (event: DragEvent) => {
+      let lastId =
+        this.nodesData.length > 0
+          ? this.nodesData[this.nodesData.length - 1].key
+          : 0;
+      lastId++;
+
+      const newUML = createDefault(lastId, { x: event.x, y: event.y });
+
+      this.addNewUMLNode(newUML);
+    });
   }
 
   private addLinksConfiguation(): void {
@@ -96,26 +167,6 @@ class App {
   }
 
   private create(): any {
-    // add workspace area
-    d3.select('body')
-      .append('xhtml:div')
-      .attrs({
-        id: 'uml_diagram_workspace',
-        class: 'uml-diagram-creator'
-      });
-
-    // add menu list
-    d3.select('body')
-      .append('xhtml:ul')
-      .attr('class', 'uml-menu')
-      .append('li')
-      .append('span')
-      .attrs({
-        id: 'uml_menu_item',
-        draggable: 'true',
-        class: 'uml-class-icon'
-      });
-
     const container = d3
       .select('#uml_diagram_workspace')
       .append('svg')
@@ -149,16 +200,9 @@ class App {
     return container;
   }
 
-  private addNewUMLNode(event: DragEvent): void {
+  private addNewUMLNode(newUML: UML): void {
     const activeColor = '#FF9800';
     const inactiveColor = '#a3a3a3';
-    let lastId =
-      this.nodesData.length > 0
-        ? this.nodesData[this.nodesData.length - 1].key
-        : 0;
-    lastId++;
-
-    const newUML = createDefault(lastId, { x: event.x, y: event.y });
 
     this.nodesData.push(newUML);
 
@@ -429,7 +473,5 @@ class App {
   }
 }
 
-window.onload = () => {
-  const app = new App();
-  app.init();
-};
+export const init = (containerReference?: string) =>
+  new App(containerReference);

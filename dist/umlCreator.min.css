@@ -1,0 +1,117 @@
+body,
+html {
+  padding: 0;
+  margin: 0;
+  z-index: 1;
+  height: 100%;
+  overflow: hidden;
+  background-color: #f6f9fc;
+  background-image: url("assets/bg.png");
+  user-select: none; }
+  body svg,
+  html svg {
+    cursor: default;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none; }
+  body path.link,
+  html path.link {
+    fill: none;
+    stroke: #000;
+    stroke-width: 4px;
+    cursor: default; }
+  body svg:not(.active):not(.ctrl) path.link,
+  html svg:not(.active):not(.ctrl) path.link {
+    cursor: pointer; }
+  body path.link.selected,
+  html path.link.selected {
+    stroke-dasharray: 10, 2; }
+  body path.link.dragline,
+  html path.link.dragline {
+    pointer-events: none; }
+  body path.link.hidden,
+  html path.link.hidden {
+    stroke-width: 0; }
+
+.uml-menu {
+  list-style: none;
+  position: absolute;
+  width: 45px;
+  height: 60px;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  padding: 5px 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.4);
+  margin: auto;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+  border-radius: 4px; }
+  .uml-menu li {
+    transition: margin-bottom 0.1s ease-in-out; }
+    .uml-menu li:hover {
+      margin-bottom: 4px; }
+  .uml-menu .uml-class-icon {
+    position: relative;
+    height: 50px;
+    cursor: grab;
+    width: 40px;
+    background-color: white;
+    border: 1px solid #d8d2d2;
+    border-radius: 2px;
+    display: block;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+    transition: all 0.2s ease-in-out; }
+    .uml-menu .uml-class-icon::before {
+      content: 'Class';
+      background-color: #ffffe0;
+      position: absolute;
+      left: 0;
+      top: 2px;
+      font-size: 10px;
+      padding: 2px 8px 2px 2px;
+      border-radius: 1px; }
+    .uml-menu .uml-class-icon::after {
+      content: '__  ___  __  ___  __  ___';
+      position: absolute;
+      color: #8c8787;
+      left: 0px;
+      top: 15px;
+      font-size: 10px;
+      padding: 2px 8px 2px 2px;
+      border-radius: 1px;
+      line-height: 4px; }
+
+.uml_input {
+  background-color: #ffffe0;
+  border: none;
+  width: 95%; }
+  .uml_input:focus {
+    outline: none;
+    border: 1px solid #9c9c9c; }
+
+/* Layout
+------------ */
+.d3-context-menu {
+  position: absolute;
+  min-width: 90px;
+  z-index: 1200;
+  background-color: #ffffe0;
+  border-radius: 4px;
+  border: 1px solid #d8d2d2; }
+  .d3-context-menu ul {
+    margin: 0;
+    padding: 0px;
+    list-style-type: none;
+    cursor: default; }
+    .d3-context-menu ul li {
+      user-select: none;
+      padding: 6px 8px;
+      border: 1px solid #d8d2d2;
+      cursor: pointer; }
+      .d3-context-menu ul li:hover {
+        background-color: #f1f1c0; }

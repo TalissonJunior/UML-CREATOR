@@ -15,30 +15,121 @@ Node.js
 
 ### Usage in production
 
-Install dependencies
-```sh
-npm install 
-```
-
-Build , it will output 2 files "`umlCreator.min.js` and `umlCreator.min.css`" under './dist' folder
-
-```sh
-npm run build 
-```
-
-
 Import the [d3js](https://d3js.org/) dependecies. 
 ```html
 <script src="http://d3js.org/d3.v4.min.js"></script>
 <script src="https://d3js.org/d3-selection-multi.v1.min.js"></script>
 ```
 
-Then import the output build files
+Then import the output build files located inside './dist/' folder
 ```html
-<link rel="stylesheet" href=".dist/umlCreator.min.css">
+<link rel="stylesheet" href="./dist/umlCreator.min.css">
 <script src="./dist/umlCreator.min.js"></script>
 ```
 
+Example
+```html
+<script>
+    // Initializing uml
+    const umlCreator = UmlCreator.init('body');
+
+    // Here you can fetch from an api, instead of hard coding
+    // Just make sure the json comes formatted;
+    const json = {
+        data : {
+            nodes: [
+                {
+                    key: 1,
+                    name: 'Professor',
+                    properties: [
+                        {
+                            name: 'classes',
+                            type: 'List<Course>',
+                            visibility: 'public'
+                        }
+                    ],
+                    methods: [
+                        {
+                            name: 'Teach',
+                            visibility: 'public',
+                            type: 'void',
+                            parameters: [
+                                {
+                                    name: 'class',
+                                    type: 'Course'
+                                }
+                            ]
+                        }
+                    ],
+                    position: {
+                        x: 10,
+                        y: 10
+                    }
+                },
+                {
+                    key: 2,
+                    name: "Course",
+                    properties: [
+                        { 
+                            name: "name", 
+                            type: "String", 
+                            visibility: "public" 
+                        },
+                        { 
+                            name: "description", 
+                            type: "String", 
+                            visibility: "public" 
+                        },
+                        { 
+                            name: "professor", 
+                            type: "Professor", 
+                            visibility: "public" 
+                        },
+                        { 
+                            name: "location", 
+                            type: "String", 
+                            visibility: "public" 
+                        },
+                        { 
+                            name: "times", 
+                            type: "List<String>", 
+                            visibility: "public" 
+                        },
+                        { 
+                            name: "prerequisites", 
+                            type: "List<String>", 
+                            visibility: "public" 
+                        },
+                        { 
+                            name: "students", 
+                            type: "List<String>", 
+                            visibility: "public" 
+                        }
+                    ],
+                    methods: [],
+                    position: {
+                        x: 150,
+                        y: 150
+                    }
+                }
+
+            ],
+            links: [
+                {
+                    source: 1,
+                    target: 2
+                }
+            ]
+        }
+    }
+
+    // Tells UMLCreator to build umls from json
+    umlCreator.fromJson(json);
+
+    // Use this method to export as json
+    const outputJson = umlCreator.toJson();
+ </script>
+```
 ### Development.
 
 
@@ -48,3 +139,8 @@ npm run serve
 ```
 it will open a browser running a server on http://localhost:3000/
 
+To build type
+
+```sh
+npm run build
+```

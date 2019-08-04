@@ -5,6 +5,10 @@ export class Utils {
     return typeof value === 'function';
   }
 
+  static isArray(value: any): boolean {
+    return Array.isArray(value);
+  }
+
   static const(value: any): Function {
     return function() {
       return value;
