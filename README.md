@@ -135,6 +135,11 @@ Example
         console.log(umlCreator.toJson())
     });
 
+    // Listen to class name changes
+    umlCreator.on('change:name', function(uml) {
+        // Do something with uml
+    });
+
     // Listen to property changes
     umlCreator.on('change:property', function(uml) {
         // Do something with uml

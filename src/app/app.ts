@@ -309,6 +309,18 @@ class App {
       });
 
     // Listeners
+    umlCreator.on('name', () => {
+      this.executeOnChangeCallbacks(
+        UMLOnChangeType.change,
+        umlCreator.formatPropertiesAndMethods(umlCreator.uml)
+      );
+
+      this.executeOnChangeCallbacks(
+        UMLOnChangeType.changeName,
+        umlCreator.formatPropertiesAndMethods(umlCreator.uml)
+      );
+    });
+
     umlCreator.on('property', () => {
       this.executeOnChangeCallbacks(
         UMLOnChangeType.change,
@@ -341,13 +353,6 @@ class App {
 
       this.executeOnChangeCallbacks(
         UMLOnChangeType.changePosition,
-        umlCreator.formatPropertiesAndMethods(umlCreator.uml)
-      );
-    });
-
-    umlCreator.on('name', () => {
-      this.executeOnChangeCallbacks(
-        UMLOnChangeType.change,
         umlCreator.formatPropertiesAndMethods(umlCreator.uml)
       );
     });
