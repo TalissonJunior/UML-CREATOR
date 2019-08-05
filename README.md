@@ -128,6 +128,33 @@ Example
 
     // Use this method to export as json
     const outputJson = umlCreator.toJson();
+
+    // Listen to any changes
+    umlCreator.on('change', function(uml) {
+        // Do something with uml
+        console.log(umlCreator.toJson())
+    });
+
+    // Listen to property changes
+    umlCreator.on('change:property', function(uml) {
+        // Do something with uml
+    });
+
+    // Listen to method changes
+    umlCreator.on('change:method', function(uml) {
+        // Do something with uml
+    });
+
+    // Listen to position changes
+    umlCreator.on('change:position', function(uml) {
+        // Do something with uml
+    });
+
+    // Listen to property and method changes
+    umlCreator.on(['change:property', 'change:method'], function(uml) {
+        // Do something with uml
+    });
+    
  </script>
 ```
 ### Development.

@@ -9,6 +9,7 @@ import { PropertyVisibility } from '../enums/property-visibility';
 import { PropertyVisibilitySymbol } from '../enums/property-visibility-symbol';
 import { UMLParameter } from '../models/uml-parameter';
 import { UMLPosition } from '../models/uml-position';
+import { UMLOnChangeType } from '../enums/uml-onchange-type';
 
 declare const d3;
 
@@ -34,9 +35,30 @@ export class UMLCreator {
   // Holds the uml data
   public uml: UML;
 
+  // Listeners
+  private onPropertyChange: Function;
+  private onMethodChange: Function;
+  private onPositionChange: Function;
+  private onNameChange: Function;
+
   constructor(uml: UML, parentContainer: any) {
     this.initialConfig(uml);
     this.instance = this.create(parentContainer);
+  }
+
+  public on(
+    type: 'property' | 'method' | 'position' | 'name',
+    callback: () => void
+  ): void {
+    if (type == 'property') {
+      this.onPropertyChange = callback;
+    } else if (type == 'method') {
+      this.onMethodChange = callback;
+    } else if (type == 'position') {
+      this.onPositionChange = callback;
+    } else if (type == 'name') {
+      this.onNameChange = callback;
+    }
   }
 
   private initialConfig(uml: UML): void {
@@ -138,6 +160,7 @@ export class UMLCreator {
   private addHeader(key: string | number, element: any, title: string): any {
     // Group elements
     const group = element.append('g').attr('type', 'header');
+    let currentValue;
 
     // Add background to the group
     group.append('rect').attrs({
@@ -167,6 +190,7 @@ export class UMLCreator {
       .attr('value', title)
       // Remove drag on focus to avoid visual bugs
       .on('focus', () => {
+        currentValue = this.uml.name;
         this.disableDrag();
         d3.select('body').attr('canZoom', false);
       })
@@ -175,6 +199,11 @@ export class UMLCreator {
         setTimeout(() => {
           this.enableDrag();
           d3.select('body').attr('canZoom', true);
+
+          if (currentValue != this.uml.name && this.onNameChange) {
+            currentValue = this.uml.name;
+            this.onNameChange();
+          }
         }, 200);
       })
       // Updates input width based on the new value
@@ -201,6 +230,7 @@ export class UMLCreator {
 
     // Group elements
     const group = element.append('g').attr('type', 'properties');
+    let currentValue;
 
     // Add background to the group
     group.append('rect').attrs({
@@ -251,15 +281,21 @@ export class UMLCreator {
           `${property.name}: ${property.type}`
       )
       // Remove drag on focus to avoid visual bugs
-      .on('focus', () => {
+      .on('focus', (property: UMLProperty) => {
+        currentValue = property.name;
         this.disableDrag();
         d3.select('body').attr('canZoom', false);
       })
       // Add drag on focus out to avoid visual bugs
-      .on('focusout', () => {
+      .on('focusout', (property: UMLProperty) => {
         setTimeout(() => {
           this.enableDrag();
           d3.select('body').attr('canZoom', true);
+
+          if (currentValue != property.name && this.onPropertyChange) {
+            currentValue = property.name;
+            this.onPropertyChange();
+          }
         }, 200);
       })
       // Updates input width based on the new value
@@ -298,6 +334,7 @@ export class UMLCreator {
 
     // Group elements
     const group = element.append('g').attr('type', 'methods');
+    let currentValue;
 
     // Add background to the group
     group.append('rect').attrs({
@@ -373,15 +410,21 @@ export class UMLCreator {
         );
       })
       // Remove drag on focus to avoid visual bugs
-      .on('focus', () => {
+      .on('focus', (method: UMLMethod) => {
+        currentValue = method.name;
         this.disableDrag();
         d3.select('body').attr('canZoom', false);
       })
       // Add drag on focus out to avoid visual bugs
-      .on('focusout', () => {
+      .on('focusout', (method: UMLMethod) => {
         setTimeout(() => {
           this.enableDrag();
           d3.select('body').attr('canZoom', true);
+
+          if (currentValue != method.name && this.onMethodChange) {
+            currentValue = method.name;
+            this.onMethodChange();
+          }
         }, 200);
       })
       // Updates input width based on the new value
@@ -454,7 +497,8 @@ export class UMLCreator {
   }
 
   private bindDrag(element: any): void {
-    let deltaX, deltaY;
+    let deltaX, deltaY, x, y;
+    let hasDrag = false;
 
     const drag = d3
       .drag()
@@ -466,8 +510,9 @@ export class UMLCreator {
         deltaY = (element.attr('y') as any) - d3.event.y;
       })
       .on('drag', () => {
-        const x = d3.event.x + deltaX;
-        const y = d3.event.y + deltaY;
+        hasDrag = true;
+        x = d3.event.x + deltaX;
+        y = d3.event.y + deltaY;
 
         // Close context menu if it is open
         new ContextMenu('close');
@@ -478,6 +523,12 @@ export class UMLCreator {
           .attr('transform', `translate(${x},${y})`);
 
         this.uml.position = new UMLPosition({ x, y });
+      })
+      .on('end', () => {
+        if (this.onPositionChange && hasDrag) {
+          hasDrag = false;
+          this.onPositionChange();
+        }
       });
 
     element.call(drag);
@@ -526,6 +577,10 @@ export class UMLCreator {
       this.addProperties(this.uml.key, this.instance, this.uml.properties);
       this.addMethods(this.uml.key, this.instance, this.uml.methods);
       this.addBorder(this.instance);
+
+      if (this.onPropertyChange) {
+        this.onPropertyChange();
+      }
     }
   }
 
@@ -572,6 +627,10 @@ export class UMLCreator {
       this.addProperties(this.uml.key, this.instance, this.uml.properties);
       this.addMethods(this.uml.key, this.instance, this.uml.methods);
       this.addBorder(this.instance);
+
+      if (this.onMethodChange) {
+        this.onMethodChange();
+      }
     }
   }
 

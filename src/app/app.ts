@@ -6,6 +6,8 @@ import { FakeLink } from '../models/fake-link';
 import { ContextMenu } from './context-menu';
 import { JsonUMLCreator } from '../models/jsonUMLCreator';
 import { Utils } from './utils';
+import { UMLOnChange } from '../models/uml-onchange';
+import { UMLOnChangeType } from '../enums/uml-onchange-type';
 
 declare const d3;
 
@@ -18,17 +20,19 @@ class App {
   links: Array<Link>;
   private nodesData: Array<UML>;
   private currentLink: FakeLink;
+  private callbackChanges: Array<UMLOnChange>;
 
   constructor(containerReference?: string) {
     this.nodesData = new Array<UML>();
     this.nodes = new Array<UMLCreator>();
     this.links = new Array<Link>();
     this.currentLink = new FakeLink();
+    this.callbackChanges = new Array<UMLOnChange>();
 
     this.init(containerReference);
 
     this.svgContainer = this.create();
-    this.addLinksConfiguation();
+    this.addLinksConfiguration();
   }
 
   public fromJson(json: JsonUMLCreator): void {
@@ -65,6 +69,31 @@ class App {
     });
 
     return new JsonUMLCreator(nodes, this.links);
+  }
+
+  public on(
+    type: UMLOnChangeType | Array<UMLOnChangeType>,
+    changeCallback: () => UML
+  ): void {
+    const callback = new UMLOnChange({ type: type, callback: changeCallback });
+    this.callbackChanges.push(callback);
+  }
+
+  // Use to execute each callback that matches the type parameter
+  private executeOnChangeCallbacks(type: UMLOnChangeType, output: UML): void {
+    this.callbackChanges.forEach(fn => {
+      if (Utils.isArray(fn.type)) {
+        const foundMatch = (fn.type as Array<UMLOnChangeType>).find(
+          t => t == type
+        );
+
+        if (foundMatch) {
+          fn.callback(output);
+        }
+      } else if (fn.type == type) {
+        fn.callback(output);
+      }
+    });
   }
 
   private init(containerReference?: string): void {
@@ -111,7 +140,7 @@ class App {
     });
   }
 
-  private addLinksConfiguation(): void {
+  private addLinksConfiguration(): void {
     const svg = this.svgContainer;
     const selftContext = this;
 
@@ -278,6 +307,50 @@ class App {
           node.enableDrag();
         });
       });
+
+    // Listeners
+    umlCreator.on('property', () => {
+      this.executeOnChangeCallbacks(
+        UMLOnChangeType.change,
+        umlCreator.formatPropertiesAndMethods(umlCreator.uml)
+      );
+
+      this.executeOnChangeCallbacks(
+        UMLOnChangeType.changeProperty,
+        umlCreator.formatPropertiesAndMethods(umlCreator.uml)
+      );
+    });
+
+    umlCreator.on('method', () => {
+      this.executeOnChangeCallbacks(
+        UMLOnChangeType.change,
+        umlCreator.formatPropertiesAndMethods(umlCreator.uml)
+      );
+
+      this.executeOnChangeCallbacks(
+        UMLOnChangeType.changeMethod,
+        umlCreator.formatPropertiesAndMethods(umlCreator.uml)
+      );
+    });
+
+    umlCreator.on('position', () => {
+      this.executeOnChangeCallbacks(
+        UMLOnChangeType.change,
+        umlCreator.formatPropertiesAndMethods(umlCreator.uml)
+      );
+
+      this.executeOnChangeCallbacks(
+        UMLOnChangeType.changePosition,
+        umlCreator.formatPropertiesAndMethods(umlCreator.uml)
+      );
+    });
+
+    umlCreator.on('name', () => {
+      this.executeOnChangeCallbacks(
+        UMLOnChangeType.change,
+        umlCreator.formatPropertiesAndMethods(umlCreator.uml)
+      );
+    });
   }
 
   private addLinkArrows(
