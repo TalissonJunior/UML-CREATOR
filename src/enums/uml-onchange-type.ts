@@ -8,5 +8,7 @@ export enum UMLOnChangeType {
   // Emit on method change
   changeMethod = 'change:method',
   // Emit on position change
-  changePosition = 'change:position'
+  changePosition = 'change:position',
+  // Emit on link change
+  changeLink = 'change:link'
 }

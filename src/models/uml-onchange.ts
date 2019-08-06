@@ -3,7 +3,7 @@ import { UML } from './uml';
 
 export class UMLOnChange {
   type: UMLOnChangeType | Array<UMLOnChangeType>;
-  callback: (uml: UML) => void;
+  callback: (...uml: UML[]) => void;
 
   constructor(umlOnChange: UMLOnChange) {
     if (umlOnChange) {

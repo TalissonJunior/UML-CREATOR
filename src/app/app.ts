@@ -80,7 +80,10 @@ class App {
   }
 
   // Use to execute each callback that matches the type parameter
-  private executeOnChangeCallbacks(type: UMLOnChangeType, output: UML): void {
+  private executeOnChangeCallbacks(
+    type: UMLOnChangeType,
+    output: UML | Array<UML>
+  ): void {
     this.callbackChanges.forEach(fn => {
       if (Utils.isArray(fn.type)) {
         const foundMatch = (fn.type as Array<UMLOnChangeType>).find(
@@ -88,10 +91,18 @@ class App {
         );
 
         if (foundMatch) {
-          fn.callback(output);
+          if (Utils.isArray(output)) {
+            fn.callback(...(output as Array<UML>));
+          } else {
+            fn.callback(output as UML);
+          }
         }
       } else if (fn.type == type) {
-        fn.callback(output);
+        if (Utils.isArray(output)) {
+          fn.callback(...(output as Array<UML>));
+        } else {
+          fn.callback(output as UML);
+        }
       }
     });
   }
@@ -136,7 +147,7 @@ class App {
 
       const newUML = createDefault(lastId, { x: event.x, y: event.y });
 
-      this.addNewUMLNode(newUML);
+      this.addNewUMLNode(newUML, true);
     });
   }
 
@@ -229,7 +240,7 @@ class App {
     return container;
   }
 
-  private addNewUMLNode(newUML: UML): void {
+  private addNewUMLNode(newUML: UML, hasDrop = false): void {
     const activeColor = '#FF9800';
     const inactiveColor = '#a3a3a3';
 
@@ -301,12 +312,50 @@ class App {
           this.links.push(newLink);
         }
 
+        const source = this.nodes.find(
+          node => node.instance == this.currentLink.mousedownNode
+        );
+
+        // Call listener
+        this.executeOnChangeCallbacks(UMLOnChangeType.changeLink, [
+          source.formatPropertiesAndMethods(source.uml),
+          umlCreator.formatPropertiesAndMethods(umlCreator.uml)
+        ]);
+
         this.resetCurrentLink();
         this.restartLinks();
         this.nodes.forEach(node => {
           node.enableDrag();
         });
       });
+
+    // on drop toggle listenners
+    if (hasDrop) {
+      this.executeOnChangeCallbacks(
+        UMLOnChangeType.change,
+        umlCreator.formatPropertiesAndMethods(umlCreator.uml)
+      );
+
+      this.executeOnChangeCallbacks(
+        UMLOnChangeType.changeName,
+        umlCreator.formatPropertiesAndMethods(umlCreator.uml)
+      );
+
+      this.executeOnChangeCallbacks(
+        UMLOnChangeType.changeProperty,
+        umlCreator.formatPropertiesAndMethods(umlCreator.uml)
+      );
+
+      this.executeOnChangeCallbacks(
+        UMLOnChangeType.changeMethod,
+        umlCreator.formatPropertiesAndMethods(umlCreator.uml)
+      );
+
+      this.executeOnChangeCallbacks(
+        UMLOnChangeType.changePosition,
+        umlCreator.formatPropertiesAndMethods(umlCreator.uml)
+      );
+    }
 
     // Listeners
     umlCreator.on('name', () => {
@@ -506,6 +555,10 @@ class App {
             action: () => {
               this.links.splice(d.index, 1);
               this.restartLinks();
+              this.executeOnChangeCallbacks(UMLOnChangeType.changeLink, [
+                d.source.formatPropertiesAndMethods(d.source.uml),
+                d.target.formatPropertiesAndMethods(d.target.uml)
+              ]);
             }
           }
         ]);

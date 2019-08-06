@@ -155,6 +155,11 @@ Example
         // Do something with uml
     });
 
+    // Listen to link changes
+    umlCreator.on('change:link', function(source, target) {
+        // Do something with source and target
+    });
+
     // Listen to property and method changes
     umlCreator.on(['change:property', 'change:method'], function(uml) {
         // Do something with uml
