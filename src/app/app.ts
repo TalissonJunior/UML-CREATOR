@@ -370,6 +370,11 @@ class App {
       );
     });
 
+    umlCreator.on('inputFocus', () => {
+      this.removeLinkArrows(umlCreator);
+      umlCreator.changeBorderColor(umlCreator.defaultBorderColor);
+    });
+
     umlCreator.on('property', () => {
       this.executeOnChangeCallbacks(
         UMLOnChangeType.change,

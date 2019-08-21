@@ -41,6 +41,7 @@ export class UMLCreator {
   private onPositionChange: Function;
   private onNameChange: Function;
   private onDelete: Function;
+  private onInputFocus: Function;
 
   constructor(uml: UML, parentContainer: any) {
     this.initialConfig(uml);
@@ -48,7 +49,7 @@ export class UMLCreator {
   }
 
   public on(
-    type: 'property' | 'method' | 'position' | 'name' | 'delete',
+    type: 'property' | 'method' | 'position' | 'name' | 'delete' | 'inputFocus',
     callback: () => void
   ): void {
     if (type == 'property') {
@@ -61,6 +62,8 @@ export class UMLCreator {
       this.onNameChange = callback;
     } else if (type == 'delete') {
       this.onDelete = callback;
+    } else if (type == 'inputFocus') {
+      this.onInputFocus = callback;
     }
   }
 
@@ -196,11 +199,13 @@ export class UMLCreator {
       .on('focus', () => {
         currentValue = this.uml.name;
         this.disableDrag();
+        this.onInputFocus();
         d3.select('body').attr('canZoom', false);
       })
       // Add drag on focus out to avoid visual bugs
       .on('focusout', () => {
         setTimeout(() => {
+          this.onInputFocus();
           this.enableDrag();
           d3.select('body').attr('canZoom', true);
 
@@ -288,11 +293,13 @@ export class UMLCreator {
       .on('focus', (property: UMLProperty) => {
         currentValue = property.name;
         this.disableDrag();
+        this.onInputFocus();
         d3.select('body').attr('canZoom', false);
       })
       // Add drag on focus out to avoid visual bugs
       .on('focusout', (property: UMLProperty) => {
         setTimeout(() => {
+          this.onInputFocus();
           this.enableDrag();
           d3.select('body').attr('canZoom', true);
 
@@ -417,11 +424,13 @@ export class UMLCreator {
       .on('focus', (method: UMLMethod) => {
         currentValue = method.name;
         this.disableDrag();
+        this.onInputFocus();
         d3.select('body').attr('canZoom', false);
       })
       // Add drag on focus out to avoid visual bugs
       .on('focusout', (method: UMLMethod) => {
         setTimeout(() => {
+          this.onInputFocus();
           this.enableDrag();
           d3.select('body').attr('canZoom', true);
 
