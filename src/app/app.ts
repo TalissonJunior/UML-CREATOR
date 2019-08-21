@@ -405,6 +405,18 @@ class App {
         umlCreator.formatPropertiesAndMethods(umlCreator.uml)
       );
     });
+
+    umlCreator.on('delete', () => {
+      this.executeOnChangeCallbacks(
+        UMLOnChangeType.change,
+        umlCreator.formatPropertiesAndMethods(umlCreator.uml)
+      );
+
+      this.executeOnChangeCallbacks(
+        UMLOnChangeType.delete,
+        umlCreator.formatPropertiesAndMethods(umlCreator.uml)
+      );
+    });
   }
 
   private addLinkArrows(

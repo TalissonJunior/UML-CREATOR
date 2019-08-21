@@ -1,6 +1,8 @@
 export enum UMLOnChangeType {
   // Emit on any change
   change = 'change',
+  // Emit on classs delete
+  delete = 'delete',
   // Emit on classs name change
   changeName = 'change:name',
   // Emit on property change

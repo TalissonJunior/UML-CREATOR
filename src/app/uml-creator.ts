@@ -40,6 +40,7 @@ export class UMLCreator {
   private onMethodChange: Function;
   private onPositionChange: Function;
   private onNameChange: Function;
+  private onDelete: Function;
 
   constructor(uml: UML, parentContainer: any) {
     this.initialConfig(uml);
@@ -47,7 +48,7 @@ export class UMLCreator {
   }
 
   public on(
-    type: 'property' | 'method' | 'position' | 'name',
+    type: 'property' | 'method' | 'position' | 'name' | 'delete',
     callback: () => void
   ): void {
     if (type == 'property') {
@@ -58,6 +59,8 @@ export class UMLCreator {
       this.onPositionChange = callback;
     } else if (type == 'name') {
       this.onNameChange = callback;
+    } else if (type == 'delete') {
+      this.onDelete = callback;
     }
   }
 
@@ -112,6 +115,7 @@ export class UMLCreator {
           {
             title: 'Remove',
             action: () => {
+              selfContext.onDelete();
               group.remove();
             }
           }

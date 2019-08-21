@@ -16,6 +16,25 @@
  <script>
     // Initializing uml
     const umlCreator = UmlCreator.init('body');
+
+    // Listen to property and method changes
+    umlCreator.on([
+    'change:name', 
+    'change:property', 
+    'change:method', 
+    'change:link',
+    'delete'
+    ], 
+        () => {
+        const json = JSON.stringify(umlCreator.toJson());
+    });
+
+    // Listen to position
+    umlCreator.on('change:position', () => {
+        const json = umlCreator.toJson();
+        console.log(json);
+    });
+
  </script>
 </body>
 </html>

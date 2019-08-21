@@ -135,37 +135,39 @@ Example
         console.log(umlCreator.toJson())
     });
 
-    // Listen to class name changes
-    umlCreator.on('change:name', function(uml) {
-        // Do something with uml
-    });
-
-    // Listen to property changes
-    umlCreator.on('change:property', function(uml) {
-        // Do something with uml
-    });
-
-    // Listen to method changes
-    umlCreator.on('change:method', function(uml) {
-        // Do something with uml
-    });
-
-    // Listen to position changes
-    umlCreator.on('change:position', function(uml) {
-        // Do something with uml
-    });
-
-    // Listen to link changes
-    umlCreator.on('change:link', function(source, target) {
-        // Do something with source and target
-    });
-
     // Listen to property and method changes
     umlCreator.on(['change:property', 'change:method'], function(uml) {
         // Do something with uml
     });
     
  </script>
+```
+
+#### ON Change Listenners
+List of available listenners 
+
+| Value        | Description   | CallbackParams         
+| ------------- | -------------| -------------
+| ``change``      | Listen to any changes | (uml) 
+| ``delete``    | Emitted when the class is deleted  | (uml)
+| ``change:name``    | Emitted when the class name changes | (uml)
+| ``change:property``    | Emitted when the class properties changes | (uml)
+| ``change:method``    | Emitted when the class methods changes | (uml)
+| ``change:position``    | Emitted when the class position change | (uml)
+| ``change:link``    | Emitted when the class links changes | (umlSource, umlTarget)
+
+Usage:
+
+```html
+<script>
+    const umlCreator = UmlCreator.init('body');
+
+    // Listen to one change at time
+    umlCreator.on('value', (callbackParams) => {});
+
+    // Listen to multiple changes at time
+    umlCreator.on(['value', 'value'], (callbackParams) => {});
+</script>
 ```
 ### Development.
 
